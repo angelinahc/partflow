@@ -7,14 +7,8 @@ namespace api.models
 {
     public class Part
     {
-        public Guid PartId { get; set; }
-        public String? PartName { get; set; }
-
-        // Constructor to add new parts
-        public Part(String name)
-        {
-            PartId = Guid.NewGuid();
-            PartName = name;
-        }
+        public Guid PartId { get; set; } = Guid.NewGuid(); // Property initializer: When you declare a new part, you already assign its default value
+        public required String PartName { get; set; }
+        public Status Status { get; set; } = Status.Recebimento;
     }
 }
