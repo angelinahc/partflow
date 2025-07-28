@@ -13,5 +13,6 @@ namespace api.data.repositories
         Task<IEnumerable<Part>> GetAllAsync(); // Return all parts that exists
         Task AddAsync(Part part); // Add a new part
         Task UpdateAsync(Part part); // Edit an existing part
+        Task<bool> PartNumberExistsAsync(string partNumber); // Verifies the existence of a part
     }
 }

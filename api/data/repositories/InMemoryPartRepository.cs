@@ -49,5 +49,11 @@ namespace api.data.repositories
             }
             return Task.CompletedTask;
         }
+
+        public Task<bool> PartNumberExistsAsync(string partNumber)
+        {
+            bool exists = _parts.Any(p => p.PartNumber.Equals(partNumber, StringComparison.OrdinalIgnoreCase));
+            return Task.FromResult(exists);
+        }
     }
 }
