@@ -13,6 +13,7 @@ builder.Services.AddSingleton<IFlowHistoryRepository, InMemoryFlowHistoryReposit
 
 // Scoped: Creates a new object for each HTTP request
 builder.Services.AddScoped<IStationService, StationService>();
+builder.Services.AddScoped<IPartService, PartService>();
 
 builder.Services.AddControllers();
 
@@ -27,11 +28,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/Teste-inicial", () =>
-    {
-        return "Tudo certo pra começar!";
-    }
-)
-.WithOpenApi();
+app.MapControllers();
 
 app.Run();

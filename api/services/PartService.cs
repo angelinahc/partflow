@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.data.repositories;
 using api.models;
+using Microsoft.AspNetCore.SignalR;
 
 namespace api.services
 {
@@ -24,6 +25,7 @@ namespace api.services
             _historyRepository = historyRepository;
         }
 
+        // Create a new part
         public async Task<Part> CreatePartAsync(string partNumber, string partName)
         {
             // Verify if part already exists
@@ -45,19 +47,29 @@ namespace api.services
             return newPart;
         }
 
+        // Get all parts
         public Task<IEnumerable<Part>> GetAllPartsAsync()
         {
-            throw new NotImplementedException();
+            return _partRepository.GetAllAsync();
         }
 
+        // Get a part by its number
         public Task<Part?> GetPartByNumberAsync(string partNumber)
         {
-            throw new NotImplementedException();
+            return _partRepository.GetByNumberAsync(partNumber);
         }
 
-        public Task<IEnumerable<FlowHistory>> GetPartHistoryAsync(string partNumber)
+        // Get the history of a part by its number
+        public async Task<IEnumerable<FlowHistory>> GetPartHistoryAsync(string partNumber)
         {
-            throw new NotImplementedException();
+            var part = await _partRepository.GetByNumberAsync(partNumber);
+
+            if (part == null)
+            {
+               return Enumerable.Empty<FlowHistory>();
+            }
+
+            return await _historyRepository.GetByPartIdAsync(part.PartId);
         }
 
         // Implementing the logic of part movement
@@ -66,7 +78,7 @@ namespace api.services
             var part = await _partRepository.GetByNumberAsync(partNumber); // Find the part
             if (part == null) return false;
 
-            if (part.Status ==Status.Completed) return false; // Part alredy finished
+            if (part.Status == Status.Completed) return false; // Part alredy finished
 
             var stations = (await _stationRepository.GetAllAsync())
                                 .OrderBy(s => s.Order).ToList();
@@ -96,6 +108,20 @@ namespace api.services
             }
 
             await _partRepository.UpdateAsync(part); // Save the new station
+            return true;
+        }
+
+        // Delete a part by its number
+        public async Task<bool> DeletePartAsync(string partNumber)
+        {
+            var part = await _partRepository.GetByNumberAsync(partNumber);
+            if (part == null)
+            {
+                return false;
+            }
+
+            part.IsActive = false;
+            await _partRepository.UpdateAsync(part);
             return true;
         }
     }

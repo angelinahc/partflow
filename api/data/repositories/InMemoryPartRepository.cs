@@ -17,10 +17,12 @@ namespace api.data.repositories
             return Task.CompletedTask;
         }
 
-        // Returns all the parts
+        // Returns all the active parts
         public Task<IEnumerable<Part>> GetAllAsync()
         {
-            return Task.FromResult(_parts.AsEnumerable());
+            var activeParts = _parts.Where(p => p.IsActive);
+
+            return Task.FromResult(activeParts.AsEnumerable());
         }
 
         // Returns all the parts that has a specific name

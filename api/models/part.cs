@@ -11,5 +11,6 @@ namespace api.models
         public required String PartNumber { get; set; }
         public required String PartName { get; set; }
         public Status Status { get; set; } = Status.Receiving;
+        public bool IsActive { get; set; } = true;
     }
 }

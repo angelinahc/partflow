@@ -17,6 +17,9 @@ namespace api.services
         // Get the history of a part by its number
         Task<IEnumerable<FlowHistory>> GetPartHistoryAsync(string partNumber);
 
+        // Removes a part by its number
+        Task<bool> DeletePartAsync(string partNumber);
+
         // Simple queries
         Task<Part?> GetPartByNumberAsync(string partNumber);
         Task<IEnumerable<Part>> GetAllPartsAsync();
