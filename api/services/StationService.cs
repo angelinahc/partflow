@@ -34,6 +34,11 @@ namespace api.services
             return _stationRepository.GetByIdAsync(id);
         }
 
+        public Task<Station?> GetByOrderAsync(int order)
+        {
+            return _stationRepository.GetByOrderAsync(order);
+        }
+
         // Creating a new station and reordering the list
         public async Task<Station> CreateStationAsync(CreateStationDto stationDto)
         {
@@ -83,7 +88,7 @@ namespace api.services
             {
                 return null;
             }
-            
+
             stationToUpdate.StationName = stationDto.StationName;
             stationToUpdate.Description = stationDto.Description;
             stationToUpdate.Location = stationDto.Location;
@@ -92,9 +97,22 @@ namespace api.services
             return stationToUpdate;
         }
 
-        public async Task<bool> DeleteStationAsync(Guid id)
+        public async Task<bool> DeleteByIdAsync(Guid id)
         {
             var station = await _stationRepository.GetByIdAsync(id);
+            if (station == null)
+            {
+                return false;
+            }
+
+            station.IsActive = false;
+            await _stationRepository.UpdateAsync(station);
+            return true;
+        }
+
+        public async Task<bool> DeleteByOrderAsync(int order)
+        {
+            var station = await _stationRepository.GetByOrderAsync(order);
             if (station == null)
             {
                 return false;

@@ -35,6 +35,17 @@ namespace api.controllers
             return Ok(station);
         }
 
+        [HttpGet("by-order/{order}")]
+        public async Task<IActionResult> GetByOrder(int order)
+        {
+            var station = await _stationService.GetByOrderAsync(order);
+            if (station == null)
+            {
+                return NotFound();
+            }
+            return Ok(station);
+        }
+
         [HttpGet("name/{stationName}")]
         public async Task<IActionResult> GetByName(string stationName)
         {
@@ -72,10 +83,18 @@ namespace api.controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpDelete("by{id}")]
+        public async Task<IActionResult> DeleteById(Guid id)
         {
-            var success = await _stationService.DeleteStationAsync(id);
+            var success = await _stationService.DeleteByIdAsync(id);
+            if (!success) return NotFound();
+            return NoContent();
+        }
+
+        [HttpDelete("{order}")]
+        public async Task<IActionResult> DeleteByOrder(int order)
+        {
+            var success = await _stationService.DeleteByOrderAsync(order);
             if (!success) return NotFound();
             return NoContent();
         }

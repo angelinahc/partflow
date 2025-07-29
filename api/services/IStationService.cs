@@ -12,8 +12,10 @@ namespace api.services
         Task<IEnumerable<Station>> GetAllStationAsync();
         Task<Station?> GetByNameAsync(string name);
         Task<Station?> GetByIdAsync(Guid id);
+        Task<Station?> GetByOrderAsync(int order);
         Task<Station> CreateStationAsync(CreateStationDto stationDto);
         Task<Station?> UpdateStationAsync(Guid id, UpdateStationDto stationDto);
-        Task<bool> DeleteStationAsync(Guid id);
+        Task<bool> DeleteByIdAsync(Guid id);
+        Task<bool> DeleteByOrderAsync(int order);
     }
-}
+}   

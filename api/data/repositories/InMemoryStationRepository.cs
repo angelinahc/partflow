@@ -30,7 +30,11 @@ namespace api.data.repositories
         // Return all stations
         public Task<IEnumerable<Station>> GetAllAsync()
         {
-            return Task.FromResult(_stations.AsEnumerable());
+            var activeAndOrderedStations = _stations
+                .Where(s => s.IsActive)
+                .OrderBy(s => s.Order); 
+            
+            return Task.FromResult(activeAndOrderedStations.AsEnumerable());
         }
 
         // Returns the first value that satisfies a condition, or returns a default value, null
@@ -43,6 +47,12 @@ namespace api.data.repositories
         public Task<Station?> GetByIdAsync(Guid id)
         {
             var station = _stations.FirstOrDefault(s => s.StationId == id);
+            return Task.FromResult(station);
+        }
+
+        public Task<Station?> GetByOrderAsync(int order)
+        {
+            var station = _stations.FirstOrDefault(s => s.Order == order && s.IsActive);
             return Task.FromResult(station);
         }
 

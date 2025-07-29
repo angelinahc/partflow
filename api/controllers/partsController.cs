@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using api.controllers.dtos;
 using api.dtos;
 using api.models;
+using api.models.dtos;
 using api.services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,15 +31,15 @@ namespace api.controller
                 var newPart = await _partService.CreatePartAsync(partDto.PartNumber, partDto.PartName);
                 return CreatedAtAction(nameof(GetByNumber), new { partNumber = newPart.PartNumber }, newPart);
             }
-            catch (InvalidCastException error)
+            catch (InvalidCastException ex)
             {
-                return Conflict(new { message = error.Message });
+                return Conflict(new { message = ex.Message });
             }
         }
 
         // Get a part by its number
         [HttpGet("{partNumber}")]
-        public async Task<IActionResult> GetByNumber(string partNumber)
+        public async Task<ActionResult<PartDto>> GetByNumber(string partNumber)
         {
             var part = await _partService.GetPartByNumberAsync(partNumber);
 
@@ -51,15 +52,15 @@ namespace api.controller
 
         // Get all the parts
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<PartDto>>> GetAll()
         {
             var part = await _partService.GetAllPartsAsync();
             return Ok(part);
         }
 
         // Get history
-        [HttpGet("{parNumber}/history")]
-        public async Task<IActionResult> GetHistory(string partNumber)
+        [HttpGet("{partNumber}/history")]
+        public async Task<ActionResult<IEnumerable<FlowHistoryDto>>> GetHistory(string partNumber)
         {
             var history = await _partService.GetPartHistoryAsync(partNumber);
             return Ok(history);
@@ -69,7 +70,7 @@ namespace api.controller
         [HttpPost("{partNumber}/move")]
         public async Task<IActionResult> Move(string partNumber, [FromBody] MovePartDto moveDto)
         {
-            var success = await _partService.MovePartAsync(partNumber, moveDto.Reponsible);
+            var success = await _partService.MovePartAsync(partNumber, moveDto.Responsible);
 
             if (!success)
             {
@@ -86,7 +87,7 @@ namespace api.controller
             var success = await _partService.DeletePartAsync(partNumber);
             if (!success)
             {
-                return NotFound();
+                return NoContent();
             }
             return Ok(new { message = $"Part {partNumber} has been removed successfully" });
         }

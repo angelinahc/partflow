@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.data.repositories;
 using api.models;
+using api.models.dtos;
 using Microsoft.AspNetCore.SignalR;
 
 namespace api.services
@@ -48,66 +49,128 @@ namespace api.services
         }
 
         // Get all parts
-        public Task<IEnumerable<Part>> GetAllPartsAsync()
+        public async Task<IEnumerable<PartDto>> GetAllPartsAsync()
         {
-            return _partRepository.GetAllAsync();
+            var parts = await _partRepository.GetAllAsync();
+            var allStations = await _stationRepository.GetAllAsync(); // Pega as estações uma vez
+
+            // Usa .Select do LINQ para aplicar a mesma lógica de mapeamento para cada item da lista
+            return parts.Select(part => new PartDto
+            {
+                PartId = part.PartId,
+                PartNumber = part.PartNumber,
+                PartName = part.PartName,
+                IsActive = part.IsActive,
+                Status = part.IsCompleted
+                    ? "Completed"
+                    : part.CurrentStationId.HasValue
+                        ? allStations.FirstOrDefault(s => s.StationId == part.CurrentStationId.Value)?.StationName ?? "Invalid station"
+                        : "Out of Process"
+            });
         }
 
         // Get a part by its number
-        public Task<Part?> GetPartByNumberAsync(string partNumber)
+        public async Task<PartDto?> GetPartByNumberAsync(string partNumber)
         {
-            return _partRepository.GetByNumberAsync(partNumber);
+            var part = await _partRepository.GetByNumberAsync(partNumber);
+            if (part == null) return null;
+
+            // Para fazer o mapeamento, precisamos da lista de estações
+            var allStations = await _stationRepository.GetAllAsync();
+
+            var partDto = new PartDto
+            {
+                PartId = part.PartId,
+                PartNumber = part.PartNumber,
+                PartName = part.PartName,
+                IsActive = part.IsActive,
+                Status = part.IsCompleted
+                    ? "Completed"
+                    : part.CurrentStationId.HasValue
+                        ? allStations.FirstOrDefault(s => s.StationId == part.CurrentStationId.Value)?.StationName ?? "Invalid station"
+                        : "Out of process"
+            };
+
+            return partDto;
         }
 
         // Get the history of a part by its number
-        public async Task<IEnumerable<FlowHistory>> GetPartHistoryAsync(string partNumber)
+        public async Task<IEnumerable<FlowHistoryDto>> GetPartHistoryAsync(string partNumber)
         {
             var part = await _partRepository.GetByNumberAsync(partNumber);
-
             if (part == null)
             {
-               return Enumerable.Empty<FlowHistory>();
+                return Enumerable.Empty<FlowHistoryDto>();
             }
 
-            return await _historyRepository.GetByPartIdAsync(part.PartId);
+            var historyRecords = await _historyRepository.GetByPartIdAsync(part.PartId);
+            
+            var allStations = (await _stationRepository.GetAllAsync()).ToList();
+
+            var historyDtos = historyRecords.Select(record => {
+                var fromStation = allStations.FirstOrDefault(s => s.StationId == record.FromStationId);
+                var toStation = allStations.FirstOrDefault(s => s.StationId == record.ToStationId);
+
+                return new FlowHistoryDto
+                {
+                    FromStationName = fromStation?.StationName ?? "Estação Desconhecida",
+                    ToStationName = record.ToStationId == Guid.Empty
+                                    ? "Completed" 
+                                    : toStation?.StationName ?? "Estação Desconhecida",
+
+                    MovementDate = record.Date,
+                    Responsible = record.Collaborator
+                };
+            }).ToList();
+
+            return historyDtos;
         }
 
-        // Implementing the logic of part movement
+        // Logic of part movement
         public async Task<bool> MovePartAsync(string partNumber, string responsible)
         {
-            var part = await _partRepository.GetByNumberAsync(partNumber); // Find the part
-            if (part == null) return false;
+            var part = await _partRepository.GetByNumberAsync(partNumber);
+            if (part == null || part.IsCompleted) return false; // Não pode mover peça inexistente ou finalizada
 
-            if (part.Status == Status.Completed) return false; // Part alredy finished
+            var stations = (await _stationRepository.GetAllAsync()).OrderBy(s => s.Order).ToList();
+            if (!stations.Any()) return false; // Não há estações cadastradas
 
-            var stations = (await _stationRepository.GetAllAsync())
-                                .OrderBy(s => s.Order).ToList();
-
-            // Find the actual station
-            var currentStation = stations.FirstOrDefault(s => s.Order == (int)part.Status + 1);
-            if (currentStation == null) return false; // Station not found
-
-            // See if the new station is valid
-            var newStation = stations.FirstOrDefault(s => s.Order == currentStation.Order + 1);
-            if (newStation != null)
+            Station? currentStation = null;
+            if (part.CurrentStationId.HasValue)
             {
-                part.Status = (Status)Enum.Parse(typeof(Status), newStation.StationName, true);
+                currentStation = stations.FirstOrDefault(s => s.StationId == part.CurrentStationId.Value);
+            }
 
-                var flow = new FlowHistory
-                {
-                    PartId = part.PartId,
-                    FromStationId = currentStation.StationId,
-                    ToStationId = newStation.StationId,
-                    Collaborator = responsible
-                };
-                await _historyRepository.AddAsync(flow); // Register at the history
+            Station? nextStation;
+            if (currentStation == null)
+            {
+                nextStation = stations.First();
             }
             else
             {
-                part.Status = Status.Completed;
+                nextStation = stations.FirstOrDefault(s => s.Order > currentStation.Order);
+            }
+            
+            var movement = new FlowHistory
+            {
+                PartId = part.PartId,
+                FromStationId = currentStation?.StationId ?? Guid.Empty,
+                ToStationId = nextStation?.StationId ?? Guid.Empty,
+                Collaborator = responsible
+            };
+            await _historyRepository.AddAsync(movement);
+
+            if (nextStation != null)
+            {
+                part.CurrentStationId = nextStation.StationId;
+            }
+            else
+            {
+                part.CurrentStationId = null;
+                part.IsCompleted = true;
             }
 
-            await _partRepository.UpdateAsync(part); // Save the new station
+            await _partRepository.UpdateAsync(part);
             return true;
         }
 

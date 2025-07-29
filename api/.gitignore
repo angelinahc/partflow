@@ -11,6 +11,3 @@
 
 # Rider specific files
 .idea/
-
-# User secrets - uncomment if you are using user secrets
-#secrets.json

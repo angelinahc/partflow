@@ -7,6 +7,6 @@ namespace api.dtos
 {
     public class MovePartDto
     {
-        public required string Reponsible { get; set; }
+        public required string Responsible { get; set; }
     }
 }

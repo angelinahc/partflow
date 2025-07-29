@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.models;
+using api.models.dtos;
 
 namespace api.services
 {
@@ -15,13 +16,13 @@ namespace api.services
         Task<bool> MovePartAsync(string partNumber, string responsible);
 
         // Get the history of a part by its number
-        Task<IEnumerable<FlowHistory>> GetPartHistoryAsync(string partNumber);
+        Task<IEnumerable<FlowHistoryDto>> GetPartHistoryAsync(string partNumber);
 
         // Removes a part by its number
         Task<bool> DeletePartAsync(string partNumber);
 
         // Simple queries
-        Task<Part?> GetPartByNumberAsync(string partNumber);
-        Task<IEnumerable<Part>> GetAllPartsAsync();
+        Task<PartDto?> GetPartByNumberAsync(string partNumber);
+        Task<IEnumerable<PartDto>> GetAllPartsAsync();
     }
 }

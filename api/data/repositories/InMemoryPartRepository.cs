@@ -42,12 +42,14 @@ namespace api.data.repositories
         // Edit a part
         public Task UpdateAsync(Part part)
         {
-            var newPart = _parts.FirstOrDefault(p => p.PartId == part.PartId);
-            if (newPart != null)
+            var existingPart = _parts.FirstOrDefault(p => p.PartId == part.PartId);
+            if (existingPart != null)
             {
-                newPart.Status = part.Status;
-                newPart.PartName = part.PartName;
-                newPart.PartNumber = part.PartNumber;
+                existingPart.CurrentStationId = part.CurrentStationId;
+                existingPart.PartName = part.PartName;
+                existingPart.PartNumber = part.PartNumber;
+                existingPart.IsActive = part.IsActive;
+                existingPart.IsCompleted = part.IsCompleted;
             }
             return Task.CompletedTask;
         }
