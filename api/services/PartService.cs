@@ -33,7 +33,7 @@ namespace api.services
             bool partExists = await _partRepository.PartNumberExistsAsync(partNumber);
             if (partExists)
             {
-                throw new InvalidOperationException($"Uma peça com o número '{partNumber}' já existe.");
+                throw new InvalidOperationException($"A part with number '{partNumber}' already exists.");
             }
 
             var newPart = new Part
