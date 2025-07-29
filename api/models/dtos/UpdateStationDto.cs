@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace api.models
+namespace api.models.dtos
 {
-    public class Station
+    public class UpdateStationDto
     {
-        public Guid StationId { get; set; } = Guid.NewGuid();
         public required string StationName { get; set; }
         public string? Description { get; set; }
         public string? Location { get; set; }
-        public int Order { get; set; }
-        public bool IsActive { get; set; } = true;
     }
 }

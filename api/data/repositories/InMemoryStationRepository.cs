@@ -34,10 +34,36 @@ namespace api.data.repositories
         }
 
         // Returns the first value that satisfies a condition, or returns a default value, null
+        public Task<Station?> GetByNameAsync(string name)
+        {
+            var station = _stations.FirstOrDefault(s => s.StationName == name);
+            return Task.FromResult(station);
+        }
+
         public Task<Station?> GetByIdAsync(Guid id)
         {
             var station = _stations.FirstOrDefault(s => s.StationId == id);
             return Task.FromResult(station);
+        }
+
+        // Update a station
+        public Task UpdateAsync(Station station)
+        {
+            var newStation = _stations.FirstOrDefault(p => p.StationId == station.StationId);
+            if (newStation != null)
+            {
+                newStation.StationName = station.StationName;
+                newStation.Description = station.Description;
+                newStation.Location = station.Location;
+            }
+            return Task.CompletedTask;
+        }
+
+        // Check if a station exists
+        public Task<bool> StationNameExistsAsync(string stationName)
+        {
+            bool exists = _stations.Any(s => s.StationName.Equals(stationName, StringComparison.OrdinalIgnoreCase));
+            return Task.FromResult(exists);
         }
     }
 }

@@ -1,25 +1,20 @@
-using api.data.repositories;
-using api.services;
+using api.extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure services
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Call the extensions
+builder.Services.AddRepositoryServices();
+builder.Services.AddApplicationServices();
 
-// Creates a single object for the whole application
-builder.Services.AddSingleton<IStationRepository, InMemoryStationRepository>();
-builder.Services.AddSingleton<IPartRepository, InMemoryPartRepository>();
-builder.Services.AddSingleton<IFlowHistoryRepository, InMemoryFlowHistoryRepository>();
 
-// Scoped: Creates a new object for each HTTP request
-builder.Services.AddScoped<IStationService, StationService>();
-builder.Services.AddScoped<IPartService, PartService>();
-
-builder.Services.AddControllers();
-
+// Configure pipeline
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

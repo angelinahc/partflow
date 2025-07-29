@@ -52,6 +52,7 @@ namespace api.data.repositories
             return Task.CompletedTask;
         }
 
+        // Check if the part exists
         public Task<bool> PartNumberExistsAsync(string partNumber)
         {
             bool exists = _parts.Any(p => p.PartNumber.Equals(partNumber, StringComparison.OrdinalIgnoreCase));
