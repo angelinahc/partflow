@@ -1,0 +1,55 @@
+<div class="container">
+  <h1>Estações de Processo</h1>
+
+  <div class="form-container">
+    <h2>{{ isEditing ? 'Edit an existing station' : 'Add a new station' }}</h2>
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="stationName">Nome:</label>
+        <input id="stationName" [(ngModel)]="stationFormModel.stationName" name="stationName" required>
+      </div>
+      <div class="form-group">
+        <label for="order">Ordem:</label>
+        <input id="order" type="number" [(ngModel)]="stationFormModel.order" name="order" [disabled]="isEditing" required>
+      </div>
+       <div class="form-group">
+        <label for="description">Descrição:</label>
+        <input id="description" [(ngModel)]="stationFormModel.description" name="description">
+      </div>
+       <div class="form-group">
+        <label for="location">Localização:</label>
+        <input id="location" [(ngModel)]="stationFormModel.location" name="location">
+      </div>
+      <button type="submit">{{ isEditing ? 'Update' : 'Add' }}</button>
+      <button type="button" *ngIf="isEditing" (click)="resetForm()">Cancelar</button>
+    </form>
+  </div>
+
+  <hr>
+
+  <h2>List of Stations</h2>
+
+  <table *ngIf="stations.length > 0">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Location</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let station of stations">
+        <td>{{ station.order }}</td>
+        <td>{{ station.stationName }}</td>
+        <td>{{ station.description }}</td>
+        <td>{{ station.location }}</td>
+        <td>
+          <button (click)="editStation(station)">Edit</button>
+          <button (click)="deleteStation(station.stationId)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -97,7 +97,7 @@ namespace api.services
             return stationToUpdate;
         }
 
-        public async Task<bool> DeleteByIdAsync(Guid id)
+        public async Task<bool> DeleteStationAsync(Guid id)
         {
             var station = await _stationRepository.GetByIdAsync(id);
             if (station == null)

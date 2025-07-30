@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using api.models;
 using api.models.dtos;
@@ -10,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace api.controllers
 {
     [ApiController]
-    [Route("api/[Controller]")]
+    [Route("api/[controller]")]
     public class StationsController : ControllerBase
     {
         private readonly IStationService _stationService;
@@ -21,7 +20,7 @@ namespace api.controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Station>>> GetAll()
+        public async Task<IActionResult> GetAll()
         {
             var stations = await _stationService.GetAllStationAsync();
             return Ok(stations);
@@ -35,14 +34,11 @@ namespace api.controllers
             return Ok(station);
         }
 
-        [HttpGet("by-order/{order}")]
+        [HttpGet("by-order/{order:int}")]
         public async Task<IActionResult> GetByOrder(int order)
         {
             var station = await _stationService.GetByOrderAsync(order);
-            if (station == null)
-            {
-                return NotFound();
-            }
+            if (station == null) return NotFound();
             return Ok(station);
         }
 
@@ -68,7 +64,7 @@ namespace api.controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStationDto stationDto)
         {
             try
@@ -83,19 +79,29 @@ namespace api.controllers
             }
         }
 
-        [HttpDelete("by{id}")]
-        public async Task<IActionResult> DeleteById(Guid id)
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var success = await _stationService.DeleteByIdAsync(id);
+            var success = await _stationService.DeleteStationAsync(id);
             if (!success) return NotFound();
             return NoContent();
         }
 
-        [HttpDelete("{order}")]
+        [HttpDelete("by-order/{order:int}")]
         public async Task<IActionResult> DeleteByOrder(int order)
         {
-            var success = await _stationService.DeleteByOrderAsync(order);
-            if (!success) return NotFound();
+            var stationToDelete = await _stationService.GetByOrderAsync(order);
+            if (stationToDelete == null)
+            {
+                return NotFound("Station with the specified order not found.");
+            }
+
+            var success = await _stationService.DeleteStationAsync(stationToDelete.StationId);
+            if (!success)
+            {
+                return NotFound();
+            }
+
             return NoContent();
         }
     }

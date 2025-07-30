@@ -1,0 +1,79 @@
+<div class="container">
+  <h1>Parts Manager</h1>
+
+  <div class="form-container">
+    <h2>Add a new part</h2>
+    <form (ngSubmit)="addPart()">
+      <div class="form-group">
+        <label for="partNumber">Part's number:</label>
+        <input id="partNumber" [(ngModel)]="newPart.partNumber" name="partNumber" required>
+      </div>
+      <div class="form-group">
+        <label for="partName">Part's name:</label>
+        <input id="partName" [(ngModel)]="newPart.partName" name="partName" required>
+      </div>
+      <button type="submit">Add part</button>
+    </form>
+  </div>
+
+  <hr>
+
+  <h2>List of parts</h2>
+  <table *ngIf="parts.length > 0">
+    <thead>
+      <tr>
+        <th>Number</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let part of parts">
+        <tr>
+          <td>{{ part.partNumber }}</td>
+          <td>{{ part.partName }}</td>
+          <td>{{ part.status }}</td>
+          <td>
+            <button (click)="showDetails(part)">
+                {{ selectedPart?.partId === part.partId ? 'Hide details' : 'Show details' }}
+            </button>
+            <button (click)="deletePart(part.partNumber)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="selectedPart?.partId === part.partId">
+          <td colspan="4">
+            <div *ngIf="selectedPart">
+              <div class="details-container">
+                <h3>Part history: {{ selectedPart.partNumber }}</h3>
+                <ul>
+                  <li *ngFor="let item of selectedPartHistory">
+                    From: <strong>{{ item.fromStationName }}</strong> 
+                    To: <strong>{{ item.toStationName }}</strong> 
+                    at {{ item.movementDate | date: 'dd/MM/yyyy HH:mm' }} 
+                    by {{ item.responsible }}
+                  </li>
+                </ul>
+                
+                <div *ngIf="selectedPart.status !== 'Completed'">
+                  <h4>Move Part</h4>
+                  <form (ngSubmit)="movePart()">
+                    <div class="form-group">
+                      <label for="responsible">Responsible:</label>
+                      <input id="responsible" [(ngModel)]="moveDto.responsible" name="responsible" required>
+                    </div>
+                    <button type="submit">Move to Next Station</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+  <div *ngIf="parts.length === 0">
+    <p>No parts found.</p>
+  </div>
+</div>
