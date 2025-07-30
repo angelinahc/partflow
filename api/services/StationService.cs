@@ -99,14 +99,27 @@ namespace api.services
 
         public async Task<bool> DeleteStationAsync(Guid id)
         {
-            var station = await _stationRepository.GetByIdAsync(id);
-            if (station == null)
+            var stationToDelete = await _stationRepository.GetByIdAsync(id);
+            if (stationToDelete == null || !stationToDelete.IsActive)
             {
                 return false;
             }
 
-            station.IsActive = false;
-            await _stationRepository.UpdateAsync(station);
+            int deletedOrder = stationToDelete.Order;
+
+            stationToDelete.IsActive = false;
+            await _stationRepository.UpdateAsync(stationToDelete);
+
+            var stationsToShift = (await _stationRepository.GetAllAsync())
+                                        .Where(s => s.Order > deletedOrder)
+                                        .ToList();
+
+            foreach (var station in stationsToShift)
+            {
+                station.Order--;
+                await _stationRepository.UpdateAsync(station);
+            }
+
             return true;
         }
 

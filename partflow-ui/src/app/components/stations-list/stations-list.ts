@@ -54,7 +54,7 @@ export class StationsListComponent implements OnInit {
     };
     
     this.stationService.addStation(dto).subscribe(() => {
-      this.loadStations(); // Recarrega a lista para pegar a reordenação
+      this.loadStations(); 
       this.resetForm();
     });
   }
@@ -86,17 +86,17 @@ export class StationsListComponent implements OnInit {
   }
 
   deleteStation(id: string): void {
-    if (confirm('Tem certeza que deseja excluir esta estação?')) {
-      console.log('Tentando deletar a estação com ID:', id); // Log 1
+    if (confirm('Are you sure you want to delete this station?')) {
+      console.log('Attempting to delete station with ID:', id);
 
       this.stationService.deleteStation(id).subscribe({
         next: () => {
-          console.log('Sucesso na API! Filtrando a lista local...'); // Log 2
-          this.stations = this.stations.filter(station => station.stationId !== id);
+          console.log('API call successful! Reloading the station list...');
+          this.loadStations();
         },
         error: (err) => {
-          console.error('Erro ao deletar estação:', err); // Log de Erro
-          alert('Ocorreu um erro ao excluir a estação.');
+          console.error('Error deleting station:', err);
+          alert('An error occurred while deleting the station.');
         }
       });
     }

@@ -1,5 +1,4 @@
 :root {
-  /* Sua nova paleta de cores */
   --red: #c92a2a;
   --cyan: #36a2bb;
   --green: #1b9c85;
@@ -10,7 +9,6 @@
   --teal: #51b6b6;
   --magenta: #a33b8a;
 
-  /* Cores base do tema (usando a nova paleta) */
   --primary: var(--cyan);
   --secondary: #6c757d;
   --danger: var(--red);
@@ -19,7 +17,6 @@
   --text-color: #212529;
   --white: #ffffff;
 
-  /* O gradiente com todas as suas cores */
   --vibrant-gradient: linear-gradient(to right, 
     var(--red), 
     var(--cyan), 
@@ -184,4 +181,61 @@ header::after {
   width: 100%;
   height: 4px;
   background: var(--vibrant-gradient);
+}
+
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    border: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  td {
+    border: none;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 50%;
+    text-align: right;
+    min-height: 20px;
+  }
+
+  td:before {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    transform: translateY(-50%);
+    text-align: left;
+    font-weight: 600;
+    color: var(--gray-dark);
+  }
+
+  .stations-table td:nth-of-type(1):before { content: "Order"; }
+  .stations-table td:nth-of-type(2):before { content: "Name"; }
+  .stations-table td:nth-of-type(3):before { content: "Description"; }
+  .stations-table td:nth-of-type(4):before { content: "Location"; }
+  .stations-table td:nth-of-type(5):before { content: "Actions"; }
+
+  .parts-table td:nth-of-type(1):before { content: "Number"; }
+  .parts-table td:nth-of-type(2):before { content: "Name"; }
+  .parts-table td:nth-of-type(3):before { content: "Status"; }
+  .parts-table td:nth-of-type(4):before { content: "Actions"; }
 }
