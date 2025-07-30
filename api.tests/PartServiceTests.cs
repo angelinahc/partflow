@@ -4,7 +4,6 @@ using api.services;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -30,17 +29,20 @@ namespace api.tests
         }
 
         [Fact]
-        public async Task CreatePartAsync_WhenPartNumberAlreadyExists_ShouldThrowInvalidOperationException()
+        public async Task CreatePartAsync_WhenActivePartExists_ShouldThrowInvalidOperationException()
         {
-            var existingPartNumber = "PN-123";
-            _mockPartRepository.Setup(repo => repo.PartNumberExistsAsync(existingPartNumber))
-                               .ReturnsAsync(true);
+            var partNumber = "PN-123";
+            var partName = "Test Part";
+            var existingActivePart = new Part { PartNumber = partNumber, PartName = "Existing Part", IsActive = true };
+
+            _mockPartRepository.Setup(repo => repo.GetByNumberAsync(partNumber))
+                               .ReturnsAsync(existingActivePart);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _partService.CreatePartAsync(existingPartNumber, "Test Part")
+                () => _partService.CreatePartAsync(partNumber, partName)
             );
-
-            Assert.Equal($"A part with number '{existingPartNumber}' already exists.", exception.Message);
+            
+            Assert.Equal($"A part with number '{partNumber}' already exists and is active.", exception.Message);
         }
 
         [Fact]
@@ -48,8 +50,12 @@ namespace api.tests
         {
             var partNumber = "PN-VALID";
             var partName = "Valid Part";
-            _mockPartRepository.Setup(repo => repo.PartNumberExistsAsync(partNumber))
-                               .ReturnsAsync(false);
+
+            _mockPartRepository.Setup(repo => repo.GetByNumberAsync(partNumber))
+                               .ReturnsAsync((Part?)null);
+             _mockPartRepository.Setup(repo => repo.GetByNameAsync(partName))
+                               .ReturnsAsync(new List<Part>());
+
 
             var result = await _partService.CreatePartAsync(partNumber, partName);
 
