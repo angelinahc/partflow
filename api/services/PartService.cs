@@ -29,23 +29,44 @@ namespace api.services
         // Create a new part
         public async Task<Part> CreatePartAsync(string partNumber, string partName)
         {
-            // Verify if part already exists
-            bool partExists = await _partRepository.PartNumberExistsAsync(partNumber);
-            if (partExists)
+            var partWithSameName = (await _partRepository.GetByNameAsync(partName))
+                                    .FirstOrDefault(p => p.IsActive);
+
+            var partWithSameNumber = await _partRepository.GetByNumberAsync(partNumber);
+
+            if (partWithSameName != null && partWithSameName.PartId != partWithSameNumber?.PartId)
             {
-                throw new InvalidOperationException($"A part with number '{partNumber}' already exists.");
+                throw new InvalidOperationException($"A part with the name '{partName}' already exists.");
             }
-
-            var newPart = new Part
+            
+            if (partWithSameNumber != null)
             {
-                PartNumber = partNumber,
-                PartName = partName
-            };
+                if (partWithSameNumber.IsActive)
+                {
+                    throw new InvalidOperationException($"A part with number '{partNumber}' already exists and is active.");
+                }
+                else
+                {
+                    partWithSameNumber.IsActive = true;
+                    partWithSameNumber.IsCompleted = false;
+                    partWithSameNumber.CurrentStationId = null;
+                    partWithSameNumber.PartName = partName;
+                    
+                    await _partRepository.UpdateAsync(partWithSameNumber);
+                    return partWithSameNumber;
+                }
+            }
+            else
+            {
+                var newPart = new Part
+                {
+                    PartNumber = partNumber,
+                    PartName = partName
+                };
 
-            // Add part into the repository
-            await _partRepository.AddAsync(newPart);
-
-            return newPart;
+                await _partRepository.AddAsync(newPart);
+                return newPart;
+            }
         }
 
         // Get all parts

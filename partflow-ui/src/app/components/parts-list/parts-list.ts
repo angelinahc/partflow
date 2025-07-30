@@ -35,9 +35,20 @@ export class PartsListComponent implements OnInit {
   }
 
   addPart(): void {
-    this.partService.addPart(this.newPart).subscribe(createdPart => {
-      this.parts.push(createdPart);
-      this.newPart = { partNumber: '', partName: '' };
+    if (!this.newPart.partNumber.trim() || !this.newPart.partName.trim()) {
+      alert('Número e Nome da Peça são obrigatórios!');
+      return;
+    }
+    
+    this.partService.addPart(this.newPart).subscribe({
+      next: (createdPart) => {
+        this.parts.push(createdPart);
+        this.newPart = { partNumber: '', partName: '' };
+      },
+      error: (err) => {
+        alert(err.error.message || 'Falha ao criar a peça');
+        console.error(err);
+      }
     });
   }
 

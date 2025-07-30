@@ -12,7 +12,7 @@
         <label for="partName">Part's name:</label>
         <input id="partName" [(ngModel)]="newPart.partName" name="partName" required>
       </div>
-      <button type="submit">Add part</button>
+      <button type="submit" class="btn btn-primary">Add Part</button>
     </form>
   </div>
 
@@ -34,11 +34,11 @@
           <td>{{ part.partNumber }}</td>
           <td>{{ part.partName }}</td>
           <td>{{ part.status }}</td>
-          <td>
-            <button (click)="showDetails(part)">
+          <td class="actions-cell">
+            <button class="btn btn-secondary" (click)="showDetails(part)">
                 {{ selectedPart?.partId === part.partId ? 'Hide details' : 'Show details' }}
             </button>
-            <button (click)="deletePart(part.partNumber)">Delete</button>
+            <button class="btn btn-danger" (click)="deletePart(part.partNumber)">Delete</button>
           </td>
         </tr>
 
@@ -63,7 +63,7 @@
                       <label for="responsible">Responsible:</label>
                       <input id="responsible" [(ngModel)]="moveDto.responsible" name="responsible" required>
                     </div>
-                    <button type="submit">Move to Next Station</button>
+                    <button type="submit" class="btn btn-primary">Move to Next Station</button>
                   </form>
                 </div>
               </div>
